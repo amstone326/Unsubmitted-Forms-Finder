@@ -13,7 +13,9 @@ public class DeviceLogEntry {
 	protected String deviceID;
 	private String logMessage;
 	// is this log entry for a "Form Entry Completed" event?
-	private boolean isFormEntryCompletedEntry;
+	private boolean isEntryForFormCompletion;
+	// will only exist on newer log entries
+	private String formRecordId;
 
 	private static DateFormat DATE_FORMAT = new SimpleDateFormat("MMM dd yyyy HH:mm z");
 
@@ -29,7 +31,12 @@ public class DeviceLogEntry {
 		this.username = tokens[3];
 		this.deviceID = tokens[5];
 		this.logMessage = tokens[6];
-		isFormEntryCompletedEntry = logMessage.contains("Form Entry Completed");
+
+		isEntryForFormCompletion = logMessage.contains("Form Entry Completed");
+		if (isEntryForFormCompletion && logMessage.contains("for record with id ")) {
+		    int recordIdBeginIndex = logMessage.lastIndexOf(" ") + 1;
+		    this.formRecordId = logMessage.substring(recordIdBeginIndex, logMessage.length());
+        }
 	}
 
 	public static void testDateParse(String dateString) {
@@ -61,15 +68,24 @@ public class DeviceLogEntry {
 	    System.out.println("Log Date: " + logDate);
         System.out.println("Username: " + username);
         System.out.println("Message: " + logMessage);
-        System.out.println("Is form entry completed msg?: " + isFormEntryCompletedEntry);
+        System.out.println("Is form entry completed msg?: " + isEntryForFormCompletion);
+        if (formRecordId != null) {
+            System.out.println("Form Record ID for log: " + formRecordId);
+        }
         System.out.println("------");
     }
 
     public static List<DeviceLogEntry> getEntriesForFormCompletionOnly(List<DeviceLogEntry> fullList) {
 	    List<DeviceLogEntry> filteredList = new ArrayList<>();
+	    DeviceLogEntry previousEntryForFormCompletion = null;
 	    for (DeviceLogEntry e : fullList) {
-	        if (e.isFormEntryCompletedEntry) {
-	            filteredList.add(e);
+	        if (e.isEntryForFormCompletion) {
+	            if (previousEntryForFormCompletion == null || !e.logDate.equals(previousEntryForFormCompletion.logDate)) {
+	                // For some reason we get duplicates of these, so we want to exclude them if the date matches the
+                    // previous one
+                    filteredList.add(e);
+                }
+                previousEntryForFormCompletion = e;
             }
         }
         return filteredList;
