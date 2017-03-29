@@ -39,14 +39,6 @@ public class DeviceLogEntry {
         }
 	}
 
-	public static void testDateParse(String dateString) {
-        try {
-            System.out.println(DATE_FORMAT.parse(dateString));
-        } catch (ParseException e) {
-            System.out.println("ERROR IN PARSE");
-        }
-    }
-
 	private static String removeLeadingAndTrailingQuotes(String s) {
 	    return s.substring(0+1, s.length()-1);
     }
@@ -61,6 +53,34 @@ public class DeviceLogEntry {
 
     private static String removeCharAtIndex(String s, int n) {
 	    return s.substring(0, n) + s.substring(n + 1);
+    }
+
+    public void findClosestMatchingSubmissionOrFlag(List<SubmitHistoryEntry> submitHistoryEntries) {
+	    long smallestDifference = Integer.MAX_VALUE;
+	    SubmitHistoryEntry closestSubmissionByDatetime = null;
+	    for (SubmitHistoryEntry submission : submitHistoryEntries) {
+	        long difference = Math.abs(submission.completedOnDeviceTime.getTime() - this.logDate.getTime());
+	        if (difference < smallestDifference) {
+	            smallestDifference = difference;
+                closestSubmissionByDatetime = submission;
+            } else {
+	            // when we get to a point where the next computed difference is increasing, we know we've found our
+                // smallest difference, because the entries are in increasing order of datetime
+	            break;
+            }
+        }
+        if (smallestDifference > 60000) {
+	        if (closestSubmissionByDatetime == null) {
+	            System.out.println("FLAG: No closest submission set for log at " + this.logDate);
+            } else {
+                // greater than a minute
+                System.out.println("FLAG: Closest matching submission for log entry at " + this.logDate +
+                        " is " + closestSubmissionByDatetime.completedOnDeviceTime);
+            }
+        } else {
+	        System.out.println("Match found for log entry on " + this.logDate + ": "
+                    + closestSubmissionByDatetime.completedOnDeviceTime + " (distance of " + smallestDifference/1000 + " seconds)");
+        }
     }
 
 	public void printImportantInfo() {
@@ -89,5 +109,13 @@ public class DeviceLogEntry {
             }
         }
         return filteredList;
+    }
+
+    public static void testDateParse(String dateString) {
+        try {
+            System.out.println(DATE_FORMAT.parse(dateString));
+        } catch (ParseException e) {
+            System.out.println("ERROR IN PARSE");
+        }
     }
 }

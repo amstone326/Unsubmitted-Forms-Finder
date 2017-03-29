@@ -11,47 +11,49 @@ public class UnsubmittedFormsFinder {
 		deviceLogsForFormCompletion = DeviceLogEntry.getEntriesForFormCompletionOnly(fullDeviceLogsList);
 
         String usernameOfInterest = deviceLogsForFormCompletion.get(0).username;
+        String deviceIdOfInterest = deviceLogsForFormCompletion.get(0).deviceID;
         Date startingDatetime = deviceLogsForFormCompletion.get(0).logDate;
 		submitHistoryList =
-                parseSubmitHistoryFromCsv(submitHistoryCsvFilename, usernameOfInterest,
+                parseSubmitHistoryFromCsv(submitHistoryCsvFilename, usernameOfInterest, deviceIdOfInterest,
                         startingDatetime);
 		// Because we get this in order of most recent first
 		Collections.reverse(submitHistoryList);
 
-        for (DeviceLogEntry entry : deviceLogsForFormCompletion) {
-            entry.printImportantInfo();
-        }
-		//flagIfMultipleDeviceIDs();
+		flagIfMultipleDeviceIDs();
 		compareListSizes();
-		//flagFirstMismatch();
+		flagMissingSubmissions();
 	}
 
     private static void flagIfMultipleDeviceIDs() {
         Set<String> uniqueDeviceIds = new HashSet<>();
         for (DeviceLogEntry entry : deviceLogsForFormCompletion) {
-            uniqueDeviceIds.add(entry.deviceID);
+            if (entry.deviceID != null) {
+                uniqueDeviceIds.add(entry.deviceID);
+            }
         }
         if (uniqueDeviceIds.size() > 1) {
-            System.out.println("FLAGGING: More than 1 device ID in device log entries: " + uniqueDeviceIds.size());
+            System.out.println("FLAGGING: More than 1 device ID in device log entries: " + uniqueDeviceIds);
         }
 
         uniqueDeviceIds.clear();
         for (SubmitHistoryEntry entry : submitHistoryList) {
-            uniqueDeviceIds.add(entry.deviceId);
+            if (entry.deviceId != null) {
+                uniqueDeviceIds.add(entry.deviceId);
+            }
         }
         if (uniqueDeviceIds.size() > 1) {
-            System.out.println("FLAGGING: More than 1 device ID in submit history entries: " + uniqueDeviceIds.size());
+            System.out.println("FLAGGING: More than 1 device ID in submit history entries: " + uniqueDeviceIds);
         }
     }
 
     private static void compareListSizes() {
         System.out.println("Number of device log entries for form completion: " + deviceLogsForFormCompletion.size());
-        System.out.println("Number of sucessfully processed form submissions: " + submitHistoryList.size());
+        System.out.println("Number of successfully processed form submissions: " + submitHistoryList.size());
     }
 
-	private static void flagFirstMismatch() {
-	    for (DeviceLogEntry entry : deviceLogsForFormCompletion) {
-
+	private static void flagMissingSubmissions() {
+	    for (DeviceLogEntry logEntry : deviceLogsForFormCompletion) {
+            logEntry.findClosestMatchingSubmissionOrFlag(submitHistoryList);
         }
     }
 
@@ -69,13 +71,15 @@ public class UnsubmittedFormsFinder {
 
 	private static List<SubmitHistoryEntry> parseSubmitHistoryFromCsv(String csvFilename,
                                                                       final String usernameOfInterest,
+                                                                      final String deviceIdOfInterest,
                                                                       final Date startingDatetime) {
         CsvReader<SubmitHistoryEntry> reader = new CsvReader<SubmitHistoryEntry>(csvFilename) {
 
             @Override
             public SubmitHistoryEntry processRow(String csvRow) {
                 SubmitHistoryEntry entry = new SubmitHistoryEntry(csvRow);
-                if (usernameOfInterest.equals(entry.username) && startingDatetime.before(entry.completedOnDeviceTime)) {
+                if (usernameOfInterest.equals(entry.username) && startingDatetime.before(entry.completedOnDeviceTime)
+                        && (entry.deviceId == null || entry.deviceId.equals(deviceIdOfInterest))) {
                     return entry;
                 } else {
                     return null;
@@ -90,7 +94,6 @@ public class UnsubmittedFormsFinder {
 		String deviceLogsCsvFilename = "all-data-files/kawok-atv2~~atvae272~~DEVICE_LOGS.csv"; //args[0];
 		String submitHistoryCsvFilename = "all-data-files/kawok-atv2~~FORMS_EXPORT.csv"; //args[1];
 		findUnsubmittedForms(deviceLogsCsvFilename, submitHistoryCsvFilename);
-        //System.out.println(DeviceLogEntry.removeCommasFromDateFields("\"Jan 25, 2017 22:11 CST\",\"Jan 27, 2017 17:57 CST\",form-entry,atvae272,atvae272,866836020291621,Form Entry Completed,unknown,2.30.0"));
 	}
 
 	private static void testDateParsing() {
