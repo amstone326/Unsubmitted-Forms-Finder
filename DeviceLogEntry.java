@@ -7,10 +7,10 @@ import java.util.List;
 
 public class DeviceLogEntry {
 
-	private Date logDate;
+	protected Date logDate;
 	private Date logSubmissionDate;
 	protected String username;
-	private String deviceID;
+	protected String deviceID;
 	private String logMessage;
 	// is this log entry for a "Form Entry Completed" event?
 	private boolean isFormEntryCompletedEntry;

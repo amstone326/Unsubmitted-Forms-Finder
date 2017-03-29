@@ -10,11 +10,11 @@ public class SubmitHistoryEntry {
 
     private String formInstanceId;
     private String domain;
-    private String username;
-    private Date completedOnDeviceTime;
+    protected String username;
+    protected Date completedOnDeviceTime;
     private String userId;
     private Date receivedByServerTime;
-    private String deviceId;
+    protected String deviceId;
     private String ccVersion;
 
     private static DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
@@ -35,11 +35,11 @@ public class SubmitHistoryEntry {
         }
 
         // Fields that won't always exist
-        if (tokens.length >= 7) {
-            deviceId = tokens[6];
+        if (tokens.length >= 8) {
+            deviceId = tokens[7];
         }
         if (tokens.length >= 8) {
-            ccVersion = tokens[7];
+            ccVersion = tokens[8];
         }
     }
 
@@ -54,5 +54,13 @@ public class SubmitHistoryEntry {
         } catch (ParseException e) {
             System.out.println("ERROR IN PARSE");
         }
+    }
+
+    public void printImportantInfo() {
+        System.out.println("------");
+        System.out.println("Form instance id: " + formInstanceId);
+        System.out.println("Username: " + username);
+        System.out.println("Completed On Device Time: " + completedOnDeviceTime);
+        System.out.println("------");
     }
 }
