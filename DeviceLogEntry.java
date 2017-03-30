@@ -92,14 +92,12 @@ public class DeviceLogEntry {
                     smallestDifference = difference;
                     closestSubmissionByDatetime = submission;
                 }
-            } else {
-                System.out.println("NOTE: Skipping match b/c already used");
             }
         }
         if (smallestDifference > 60000) {
             // greater than a minute
-            System.out.println("FLAG: Closest matching submission for log entry at " + this.logDate +
-                    " is " + closestSubmissionByDatetime.completedOnDeviceTime);
+            System.out.println("FLAG: Closest matching submission for log entry is " +
+                    closestSubmissionByDatetime.completedOnDeviceTime + " (distance of " + smallestDifference / 1000 + " seconds)");
             this.printImportantInfo();
         } else {
             System.out.println("Match found for log entry on " + this.logDate + ": "

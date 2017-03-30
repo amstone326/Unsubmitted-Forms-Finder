@@ -13,6 +13,7 @@ public class UnsubmittedFormsFinder {
     static {
         domainToCsvFilesMap = new HashMap<>();
 
+        // RESULT: 8 potential missing forms
         domainToCsvFilesMap.put("oaf-burundi-qdv",
                 new String[]{"data-files/oaf-burundi-qdv~~oaf_burundi_38~~DEVICE_LOGS.csv",
                              "data-files/oaf-burundi-qdv~~FORMS_EXPORT.csv"});
@@ -21,6 +22,11 @@ public class UnsubmittedFormsFinder {
         domainToCsvFilesMap.put("kawok-atv2",
                 new String[]{"data-files/kawok-atv2~~atvae272~~DEVICE_LOGS.csv",
                              "data-files/kawok-atv2~~FORMS_EXPORT.csv"});
+
+        // RESULT: 16 potential missing forms
+        domainToCsvFilesMap.put("oaf-burundi-pi",
+                new String[]{"data-files/oaf-burundi-pi~~mugisha_leonce~~DEVICE_LOGS.csv",
+                             "data-files/oaf-burundi-pi~~FORMS_EXPORT.csv"});
     }
 
     private static void findUnsubmittedForms(String deviceLogsCsvFilename, String submitHistoryCsvFilename) {
