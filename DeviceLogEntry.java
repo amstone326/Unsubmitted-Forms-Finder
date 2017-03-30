@@ -72,6 +72,10 @@ public class DeviceLogEntry {
             System.out.println("FLAG: No closest submission set for log with instance id " + this.formRecordId);
         } else {
             System.out.println("Match found for log entry with instance id " + this.formRecordId);
+            if (match.alreadyMatchedToDeviceLogEntry) {
+                System.out.println("FLAG: the above match was already used");
+            }
+            match.setMatchedToDeviceLogEntry();
         }
     }
 
@@ -86,16 +90,16 @@ public class DeviceLogEntry {
             }
         }
         if (smallestDifference > 60000) {
-            if (closestSubmissionByDatetime == null) {
-                System.out.println("FLAG: No closest submission set for log at " + this.logDate);
-            } else {
-                // greater than a minute
-                System.out.println("FLAG: Closest matching submission for log entry at " + this.logDate +
-                        " is " + closestSubmissionByDatetime.completedOnDeviceTime);
-            }
+            // greater than a minute
+            System.out.println("FLAG: Closest matching submission for log entry at " + this.logDate +
+                    " is " + closestSubmissionByDatetime.completedOnDeviceTime);
         } else {
             System.out.println("Match found for log entry on " + this.logDate + ": "
                     + closestSubmissionByDatetime.completedOnDeviceTime + " (distance of " + smallestDifference / 1000 + " seconds)");
+            if (closestSubmissionByDatetime.alreadyMatchedToDeviceLogEntry) {
+                System.out.println("FLAG: the above match was already used");
+            }
+            closestSubmissionByDatetime.setMatchedToDeviceLogEntry();
         }
     }
 

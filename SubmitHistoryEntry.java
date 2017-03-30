@@ -17,6 +17,8 @@ public class SubmitHistoryEntry {
     protected String deviceId;
     private String ccVersion;
 
+    protected boolean alreadyMatchedToDeviceLogEntry;
+
     private static DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
 
     public SubmitHistoryEntry(String row) {
@@ -62,5 +64,9 @@ public class SubmitHistoryEntry {
         System.out.println("Username: " + username);
         System.out.println("Completed On Device Time: " + completedOnDeviceTime);
         System.out.println("------");
+    }
+
+    public void setMatchedToDeviceLogEntry() {
+        alreadyMatchedToDeviceLogEntry = true;
     }
 }
