@@ -6,7 +6,19 @@ public class UnsubmittedFormsFinder {
     private static List<DeviceLogEntry> deviceLogsForFormCompletion;
     private static List<SubmitHistoryEntry> submitHistoryList;
 
-	private static void findUnsubmittedForms(String deviceLogsCsvFilename, String submitHistoryCsvFilename) {
+    private static Map<String, String[]> domainToCsvFilesMap;
+
+    static {
+        domainToCsvFilesMap = new HashMap<>();
+        domainToCsvFilesMap.put("oaf-burundi-qdv",
+                new String[]{"data-files/oaf-burundi-qdv~~oaf_burundi_38~~DEVICE_LOGS.csv",
+                             "data-files/oaf-burundi-qdv~~FORMS_EXPORT.csv"});
+        domainToCsvFilesMap.put("kawok-atv2",
+                new String[]{"data-files/kawok-atv2~~atvae272~~DEVICE_LOGS.csv",
+                             "data-files/kawok-atv2~~FORMS_EXPORT.csv"});
+    }
+
+    private static void findUnsubmittedForms(String deviceLogsCsvFilename, String submitHistoryCsvFilename) {
 		fullDeviceLogsList = parseDeviceLogsFromCsv(deviceLogsCsvFilename);
 		deviceLogsForFormCompletion = DeviceLogEntry.getEntriesForFormCompletionOnly(fullDeviceLogsList);
 
@@ -16,8 +28,6 @@ public class UnsubmittedFormsFinder {
 		submitHistoryList =
                 parseSubmitHistoryFromCsv(submitHistoryCsvFilename, usernameOfInterest, deviceIdOfInterest,
                         startingDatetime);
-		// Because we get this in order of most recent first
-		Collections.reverse(submitHistoryList);
 
 		flagIfMultipleDeviceIDs();
 		compareListSizes();
@@ -91,8 +101,14 @@ public class UnsubmittedFormsFinder {
     }
 	
 	public static void main(String[] args) {
-		String deviceLogsCsvFilename = "all-data-files/kawok-atv2~~atvae272~~DEVICE_LOGS.csv"; //args[0];
-		String submitHistoryCsvFilename = "all-data-files/kawok-atv2~~FORMS_EXPORT.csv"; //args[1];
+        String domain = args[0];
+        String[] csvFiles = domainToCsvFilesMap.get(domain);
+        if (csvFiles == null) {
+            System.out.println("Invalid domain provided");
+            return;
+        }
+		String deviceLogsCsvFilename = csvFiles[0];
+		String submitHistoryCsvFilename = csvFiles[1];
 		findUnsubmittedForms(deviceLogsCsvFilename, submitHistoryCsvFilename);
 	}
 

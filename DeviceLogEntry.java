@@ -61,13 +61,9 @@ public class DeviceLogEntry {
 	    for (SubmitHistoryEntry submission : submitHistoryEntries) {
 	        long difference = Math.abs(submission.completedOnDeviceTime.getTime() - this.logDate.getTime());
 	        if (difference < smallestDifference) {
-	            smallestDifference = difference;
-                closestSubmissionByDatetime = submission;
-            } else {
-	            // when we get to a point where the next computed difference is increasing, we know we've found our
-                // smallest difference, because the entries are in increasing order of datetime
-	            break;
-            }
+				smallestDifference = difference;
+				closestSubmissionByDatetime = submission;
+			}
         }
         if (smallestDifference > 60000) {
 	        if (closestSubmissionByDatetime == null) {
