@@ -70,12 +70,15 @@ public class DeviceLogEntry {
         SubmitHistoryEntry match = submitHistoryEntries.get(this.formRecordId);
         if (match == null) {
             System.out.println("FLAG: No closest submission set for log with instance id " + this.formRecordId);
+            this.printImportantInfo();
         } else {
-            System.out.println("Match found for log entry with instance id " + this.formRecordId);
             if (match.alreadyMatchedToDeviceLogEntry) {
-                System.out.println("FLAG: the above match was already used");
+                System.out.println("FLAG: Match found via instance id was already used");
+                this.printImportantInfo();
+            } else {
+                System.out.println("Match found for log entry with instance id " + this.formRecordId);
+                match.setMatchedToDeviceLogEntry();
             }
-            match.setMatchedToDeviceLogEntry();
         }
     }
 
@@ -83,22 +86,24 @@ public class DeviceLogEntry {
         long smallestDifference = Integer.MAX_VALUE;
         SubmitHistoryEntry closestSubmissionByDatetime = null;
         for (SubmitHistoryEntry submission : submitHistoryEntries.values()) {
-            long difference = Math.abs(submission.completedOnDeviceTime.getTime() - this.logDate.getTime());
-            if (difference < smallestDifference) {
-                smallestDifference = difference;
-                closestSubmissionByDatetime = submission;
+            if (!submission.alreadyMatchedToDeviceLogEntry) {
+                long difference = Math.abs(submission.completedOnDeviceTime.getTime() - this.logDate.getTime());
+                if (difference < smallestDifference) {
+                    smallestDifference = difference;
+                    closestSubmissionByDatetime = submission;
+                }
+            } else {
+                System.out.println("NOTE: Skipping match b/c already used");
             }
         }
         if (smallestDifference > 60000) {
             // greater than a minute
             System.out.println("FLAG: Closest matching submission for log entry at " + this.logDate +
                     " is " + closestSubmissionByDatetime.completedOnDeviceTime);
+            this.printImportantInfo();
         } else {
             System.out.println("Match found for log entry on " + this.logDate + ": "
                     + closestSubmissionByDatetime.completedOnDeviceTime + " (distance of " + smallestDifference / 1000 + " seconds)");
-            if (closestSubmissionByDatetime.alreadyMatchedToDeviceLogEntry) {
-                System.out.println("FLAG: the above match was already used");
-            }
             closestSubmissionByDatetime.setMatchedToDeviceLogEntry();
         }
     }
