@@ -7,12 +7,17 @@ public class UnsubmittedFormsFinder {
     private static List<SubmitHistoryEntry> submitHistoryList;
 
     private static Map<String, String[]> domainToCsvFilesMap;
+    private static Map<String, SubmitHistoryEntry> instanceIdToSubmissionMap;
+
 
     static {
         domainToCsvFilesMap = new HashMap<>();
+
         domainToCsvFilesMap.put("oaf-burundi-qdv",
                 new String[]{"data-files/oaf-burundi-qdv~~oaf_burundi_38~~DEVICE_LOGS.csv",
                              "data-files/oaf-burundi-qdv~~FORMS_EXPORT.csv"});
+
+        // RESULT: All logs had a match
         domainToCsvFilesMap.put("kawok-atv2",
                 new String[]{"data-files/kawok-atv2~~atvae272~~DEVICE_LOGS.csv",
                              "data-files/kawok-atv2~~FORMS_EXPORT.csv"});
@@ -28,11 +33,19 @@ public class UnsubmittedFormsFinder {
 		submitHistoryList =
                 parseSubmitHistoryFromCsv(submitHistoryCsvFilename, usernameOfInterest, deviceIdOfInterest,
                         startingDatetime);
+		createInstanceIdToSubmissionMap();
 
 		flagIfMultipleDeviceIDs();
 		compareListSizes();
 		flagMissingSubmissions();
 	}
+
+	private static void createInstanceIdToSubmissionMap() {
+        instanceIdToSubmissionMap = new HashMap<>();
+        for (SubmitHistoryEntry submission : submitHistoryList) {
+            instanceIdToSubmissionMap.put(submission.formInstanceId, submission);
+        }
+    }
 
     private static void flagIfMultipleDeviceIDs() {
         Set<String> uniqueDeviceIds = new HashSet<>();
@@ -63,7 +76,7 @@ public class UnsubmittedFormsFinder {
 
 	private static void flagMissingSubmissions() {
 	    for (DeviceLogEntry logEntry : deviceLogsForFormCompletion) {
-            logEntry.findClosestMatchingSubmissionOrFlag(submitHistoryList);
+            logEntry.findClosestMatchingSubmissionOrFlag(instanceIdToSubmissionMap);
         }
     }
 

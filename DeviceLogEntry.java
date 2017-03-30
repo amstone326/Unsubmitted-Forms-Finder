@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 public class DeviceLogEntry {
 
@@ -55,27 +56,46 @@ public class DeviceLogEntry {
 	    return s.substring(0, n) + s.substring(n + 1);
     }
 
-    public void findClosestMatchingSubmissionOrFlag(List<SubmitHistoryEntry> submitHistoryEntries) {
-	    long smallestDifference = Integer.MAX_VALUE;
-	    SubmitHistoryEntry closestSubmissionByDatetime = null;
-	    for (SubmitHistoryEntry submission : submitHistoryEntries) {
-	        long difference = Math.abs(submission.completedOnDeviceTime.getTime() - this.logDate.getTime());
-	        if (difference < smallestDifference) {
-				smallestDifference = difference;
-				closestSubmissionByDatetime = submission;
-			}
+    public void findClosestMatchingSubmissionOrFlag(Map<String, SubmitHistoryEntry> submitHistoryEntries) {
+	    if (formRecordId != null) {
+	        // If this is a newer log entry that has this info, then we can just match up based on that! yay!
+	        findMatchViaRecordId(submitHistoryEntries);
+        } else {
+	        // Otherwise, we need to just find the closest match by time
+            findMatchViaTiming(submitHistoryEntries);
+        }
+    }
+
+    private void findMatchViaRecordId(Map<String, SubmitHistoryEntry> submitHistoryEntries) {
+        SubmitHistoryEntry match = submitHistoryEntries.get(this.formRecordId);
+        if (match == null) {
+            System.out.println("FLAG: No closest submission set for log with instance id " + this.formRecordId);
+        } else {
+            System.out.println("Match found for log entry with instance id " + this.formRecordId);
+        }
+    }
+
+    private void findMatchViaTiming(Map<String, SubmitHistoryEntry> submitHistoryEntries) {
+        long smallestDifference = Integer.MAX_VALUE;
+        SubmitHistoryEntry closestSubmissionByDatetime = null;
+        for (SubmitHistoryEntry submission : submitHistoryEntries.values()) {
+            long difference = Math.abs(submission.completedOnDeviceTime.getTime() - this.logDate.getTime());
+            if (difference < smallestDifference) {
+                smallestDifference = difference;
+                closestSubmissionByDatetime = submission;
+            }
         }
         if (smallestDifference > 60000) {
-	        if (closestSubmissionByDatetime == null) {
-	            System.out.println("FLAG: No closest submission set for log at " + this.logDate);
+            if (closestSubmissionByDatetime == null) {
+                System.out.println("FLAG: No closest submission set for log at " + this.logDate);
             } else {
                 // greater than a minute
                 System.out.println("FLAG: Closest matching submission for log entry at " + this.logDate +
                         " is " + closestSubmissionByDatetime.completedOnDeviceTime);
             }
         } else {
-	        System.out.println("Match found for log entry on " + this.logDate + ": "
-                    + closestSubmissionByDatetime.completedOnDeviceTime + " (distance of " + smallestDifference/1000 + " seconds)");
+            System.out.println("Match found for log entry on " + this.logDate + ": "
+                    + closestSubmissionByDatetime.completedOnDeviceTime + " (distance of " + smallestDifference / 1000 + " seconds)");
         }
     }
 

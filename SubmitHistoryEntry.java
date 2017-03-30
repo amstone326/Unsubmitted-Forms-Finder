@@ -8,7 +8,7 @@ import java.util.Date;
  */
 public class SubmitHistoryEntry {
 
-    private String formInstanceId;
+    protected String formInstanceId;
     private String domain;
     protected String username;
     protected Date completedOnDeviceTime;
