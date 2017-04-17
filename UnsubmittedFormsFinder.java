@@ -86,6 +86,34 @@ public class UnsubmittedFormsFinder {
         }
     }
 
+    private static void findLogsForSpecificForm(String deviceLogsCsvFilename, String formDesignerIdToFind) {
+        fullDeviceLogsList = parseDeviceLogsFromCsv(deviceLogsCsvFilename);
+        List<DeviceLogEntry> matches = new ArrayList<>();
+        for (DeviceLogEntry entry : fullDeviceLogsList) {
+            if (entry.logMessage.contains(formDesignerIdToFind)) {
+                matches.add(entry);
+            }
+        }
+        System.out.println(matches.size() + " matches found for form designer ID " + formDesignerIdToFind);
+        for (DeviceLogEntry match : matches) {
+            match.printImportantInfo();
+        }
+    }
+
+    private static void findInstancesOfLogMessage(String deviceLogsCsvFilename, String logMessageToFind) {
+        fullDeviceLogsList = parseDeviceLogsFromCsv(deviceLogsCsvFilename);
+        List<DeviceLogEntry> matches = new ArrayList<>();
+        for (DeviceLogEntry entry : fullDeviceLogsList) {
+            if (entry.logMessage.contains(logMessageToFind)) {
+                matches.add(entry);
+            }
+        }
+        System.out.println(matches.size() + " instances of this log message were found");
+        for (DeviceLogEntry match : matches) {
+            match.printImportantInfo();
+        }
+    }
+
 	private static List<DeviceLogEntry> parseDeviceLogsFromCsv(String csvFilename) {
 	    CsvReader<DeviceLogEntry> reader = new CsvReader<DeviceLogEntry>(csvFilename) {
 
@@ -120,16 +148,46 @@ public class UnsubmittedFormsFinder {
     }
 	
 	public static void main(String[] args) {
-        String domain = args[0];
+        String strategyNumber = args[0];
+        if ("1".equals(strategyNumber)) {
+            doStrategy1(args);
+        } else if ("2".equals(strategyNumber)) {
+            doStrategy2(args);
+        } else if ("3".equals(strategyNumber)) {
+            doStrategy3(args);
+        } else {
+            System.out.println("Invalid strategy number provided");
+        }
+	}
+
+	private static void doStrategy1(String[] args) {
+        System.out.println("Executing strategy 1");
+        String domain = args[1];
         String[] csvFiles = domainToCsvFilesMap.get(domain);
         if (csvFiles == null) {
             System.out.println("Invalid domain provided");
             return;
         }
-		String deviceLogsCsvFilename = csvFiles[0];
-		String submitHistoryCsvFilename = csvFiles[1];
-		findUnsubmittedForms(deviceLogsCsvFilename, submitHistoryCsvFilename);
-	}
+        String deviceLogsCsvFilename = csvFiles[0];
+        String submitHistoryCsvFilename = csvFiles[1];
+        findUnsubmittedForms(deviceLogsCsvFilename, submitHistoryCsvFilename);
+    }
+
+    private static void doStrategy2(String[] args) {
+        System.out.println("Executing strategy 2");
+        String deviceLogsCsvFilename = args[1];
+        String[] formDesignerIdsToFind = args[2].split(",");
+        for (String formDesignerIdToFind : formDesignerIdsToFind) {
+            findLogsForSpecificForm(deviceLogsCsvFilename, formDesignerIdToFind);
+        }
+    }
+
+    private static void doStrategy3(String[] args) {
+        System.out.println("Executing strategy 3");
+        String deviceLogsCsvFilename = args[1];
+        String logMessageToFind = args[2];
+        findInstancesOfLogMessage(deviceLogsCsvFilename, logMessageToFind);
+    }
 
 	private static void testDateParsing() {
         DeviceLogEntry.testDateParse("Jan 25 2017 22:08 CST"); // Thu Jan 26 06:08:00 SAST 2017

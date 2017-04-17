@@ -12,7 +12,7 @@ public class DeviceLogEntry {
 	private Date logSubmissionDate;
 	protected String username;
 	protected String deviceID;
-	private String logMessage;
+	protected String logMessage;
 	// is this log entry for a "Form Entry Completed" event?
 	private boolean isEntryForFormCompletion;
 	// will only exist on newer log entries
@@ -69,7 +69,7 @@ public class DeviceLogEntry {
     private void findMatchViaRecordId(Map<String, SubmitHistoryEntry> submitHistoryEntries) {
         SubmitHistoryEntry match = submitHistoryEntries.get(this.formRecordId);
         if (match == null) {
-            System.out.println("FLAG: No closest submission set for log with instance id " + this.formRecordId);
+            System.out.println("FLAG: No matching submission found for log with instance id " + this.formRecordId);
             this.printImportantInfo();
         } else {
             if (match.alreadyMatchedToDeviceLogEntry) {
