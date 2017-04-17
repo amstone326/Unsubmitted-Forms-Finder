@@ -149,7 +149,7 @@ public class UnsubmittedFormsFinder {
             @Override
             public SubmitHistoryEntry processRow(String csvRow) {
                 SubmitHistoryEntry entry = new SubmitHistoryEntry(csvRow);
-                if (usernameOfInterest.equals(entry.username) && startingDatetime.before(entry.completedOnDeviceTime)
+                if (usernameOfInterest.equals(entry.username)
                         && (entry.deviceId == null || entry.deviceId.equals(deviceIdOfInterest))) {
                     return entry;
                 } else {
