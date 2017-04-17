@@ -18,6 +18,9 @@ public class DeviceLogEntry {
 	// will only exist on newer log entries
 	private String formRecordId;
 
+	protected List<DeviceLogEntry> precedingLogs = new ArrayList<>();
+	protected List<DeviceLogEntry> succeedingLogs = new ArrayList<>();
+
 	private static DateFormat DATE_FORMAT = new SimpleDateFormat("MMM dd yyyy HH:mm z");
 
 	public DeviceLogEntry(String csvRow) {
@@ -118,6 +121,27 @@ public class DeviceLogEntry {
         System.out.println("------");
     }
 
+    public void printPrecedingLogs() {
+	    if (precedingLogs.size() > 0) {
+	        System.out.println("");
+	        System.out.println("   Preceding Logs:");
+            for (DeviceLogEntry e : precedingLogs) {
+                System.out.println("   " + e.logDate + ": " + e.logMessage);
+            }
+        }
+
+    }
+
+    public void printSucceedingLogs() {
+        if (precedingLogs.size() > 0) {
+            System.out.println("   Succeeding Logs:");
+            for (DeviceLogEntry e : succeedingLogs) {
+                System.out.println("   " + e.logDate + ": " + e.logMessage);
+            }
+        }
+
+    }
+
     public static List<DeviceLogEntry> getEntriesForFormCompletionOnly(List<DeviceLogEntry> fullList) {
 	    List<DeviceLogEntry> filteredList = new ArrayList<>();
 	    DeviceLogEntry previousEntryForFormCompletion = null;
@@ -140,5 +164,13 @@ public class DeviceLogEntry {
         } catch (ParseException e) {
             System.out.println("ERROR IN PARSE");
         }
+    }
+
+    public void addSucceedingLog(DeviceLogEntry e) {
+	    this.succeedingLogs.add(e);
+    }
+
+    public void addPrecedingLog(DeviceLogEntry e) {
+        this.precedingLogs.add(e);
     }
 }

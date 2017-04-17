@@ -27,6 +27,10 @@ public class UnsubmittedFormsFinder {
         domainToCsvFilesMap.put("oaf-burundi-pi",
                 new String[]{"data-files/oaf-burundi-pi~~mugisha_leonce~~DEVICE_LOGS.csv",
                              "data-files/oaf-burundi-pi~~FORMS_EXPORT.csv"});
+
+        domainToCsvFilesMap.put("gpi-venukonda-hh-tool",
+                new String[]{"data-files/gpi-venukonda-hh-tool~~cms8~~DEVICE_LOGS.csv," +
+                        "data-files/gpi-venukonda-hh-tool~~FORMS_EXPORT.csv"});
     }
 
     private static void findUnsubmittedForms(String deviceLogsCsvFilename, String submitHistoryCsvFilename) {
@@ -100,17 +104,27 @@ public class UnsubmittedFormsFinder {
         }
     }
 
-    private static void findInstancesOfLogMessage(String deviceLogsCsvFilename, String logMessageToFind) {
+    private static void findInstancesOfLogMessage(String deviceLogsCsvFilename, String logMessageToFind,
+                                                  int numSurroundingLogsToShow) {
         fullDeviceLogsList = parseDeviceLogsFromCsv(deviceLogsCsvFilename);
         List<DeviceLogEntry> matches = new ArrayList<>();
-        for (DeviceLogEntry entry : fullDeviceLogsList) {
+        for (int i = 0; i < fullDeviceLogsList.size(); i ++) {
+            DeviceLogEntry entry = fullDeviceLogsList.get(i);
             if (entry.logMessage.contains(logMessageToFind)) {
                 matches.add(entry);
+                for (int j = numSurroundingLogsToShow; j > 0; j--) {
+                    entry.addPrecedingLog(fullDeviceLogsList.get(i-j));
+                }
+                for (int j = 0; j < numSurroundingLogsToShow; j++) {
+                    entry.addSucceedingLog(fullDeviceLogsList.get(i+1+j));
+                }
             }
         }
         System.out.println(matches.size() + " instances of this log message were found");
         for (DeviceLogEntry match : matches) {
+            match.printPrecedingLogs();
             match.printImportantInfo();
+            match.printSucceedingLogs();
         }
     }
 
@@ -186,7 +200,7 @@ public class UnsubmittedFormsFinder {
         System.out.println("Executing strategy 3");
         String deviceLogsCsvFilename = args[1];
         String logMessageToFind = args[2];
-        findInstancesOfLogMessage(deviceLogsCsvFilename, logMessageToFind);
+        findInstancesOfLogMessage(deviceLogsCsvFilename, logMessageToFind, 2);
     }
 
 	private static void testDateParsing() {
