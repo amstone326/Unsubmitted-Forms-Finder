@@ -19,7 +19,8 @@ public class SubmitHistoryEntry {
 
     protected boolean alreadyMatchedToDeviceLogEntry;
 
-    private static DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
+    private static DateFormat DATE_FORMAT_1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
+    private static DateFormat DATE_FORMAT_2 = new SimpleDateFormat("M/dd/yy H:mm");
 
     public SubmitHistoryEntry(String row) {
         String[] tokens = row.split(",");
@@ -30,10 +31,15 @@ public class SubmitHistoryEntry {
         userId = tokens[4];
 
         try {
-            completedOnDeviceTime = DATE_FORMAT.parse(removeMillisecondDataFromDateString(tokens[3]));
-            receivedByServerTime = DATE_FORMAT.parse(removeMillisecondDataFromDateString(tokens[5]));
+            completedOnDeviceTime = DATE_FORMAT_1.parse(removeMillisecondDataFromDateString(tokens[3]));
+            receivedByServerTime = DATE_FORMAT_1.parse(removeMillisecondDataFromDateString(tokens[5]));
         } catch (ParseException e) {
-            System.out.println("Error parsing dates in SubmitHistoryEntry");
+            try {
+                completedOnDeviceTime = DATE_FORMAT_2.parse(removeMillisecondDataFromDateString(tokens[3]));
+                receivedByServerTime = DATE_FORMAT_2.parse(removeMillisecondDataFromDateString(tokens[5]));
+            } catch (ParseException e2) {
+                System.out.println("Error parsing dates in SubmitHistoryEntry");
+            }
         }
 
         // Fields that won't always exist
@@ -47,12 +53,24 @@ public class SubmitHistoryEntry {
 
     public static String removeMillisecondDataFromDateString(String dateString) {
         int indexOfPeriod = dateString.indexOf(".");
-        return dateString.substring(0, indexOfPeriod) + dateString.substring(dateString.length()-1);
+        if (indexOfPeriod >= 0) {
+            return dateString.substring(0, indexOfPeriod) + dateString.substring(dateString.length() - 1);
+        } else {
+            return dateString;
+        }
     }
 
-    public static void testDateParse(String dateString) {
+    public static void testDateParse1(String dateString) {
         try {
-            System.out.println(DATE_FORMAT.parse(removeMillisecondDataFromDateString(dateString)));
+            System.out.println(DATE_FORMAT_1.parse(removeMillisecondDataFromDateString(dateString)));
+        } catch (ParseException e) {
+            System.out.println("ERROR IN PARSE");
+        }
+    }
+
+    public static void testDateParse2(String dateString) {
+        try {
+            System.out.println(DATE_FORMAT_2.parse(removeMillisecondDataFromDateString(dateString)));
         } catch (ParseException e) {
             System.out.println("ERROR IN PARSE");
         }

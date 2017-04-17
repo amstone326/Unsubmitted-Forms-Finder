@@ -29,7 +29,7 @@ public class UnsubmittedFormsFinder {
                              "data-files/oaf-burundi-pi~~FORMS_EXPORT.csv"});
 
         domainToCsvFilesMap.put("gpi-venukonda-hh-tool",
-                new String[]{"data-files/gpi-venukonda-hh-tool~~cms8~~DEVICE_LOGS.csv," +
+                new String[]{"data-files/gpi-venukonda-hh-tool~~cms8~~DEVICE_LOGS.csv",
                         "data-files/gpi-venukonda-hh-tool~~FORMS_EXPORT.csv"});
     }
 
@@ -169,6 +169,8 @@ public class UnsubmittedFormsFinder {
             doStrategy2(args);
         } else if ("3".equals(strategyNumber)) {
             doStrategy3(args);
+        } else if ("date".equals(strategyNumber)) {
+            testDateParse(args[1], args[2]);
         } else {
             System.out.println("Invalid strategy number provided");
         }
@@ -208,8 +210,16 @@ public class UnsubmittedFormsFinder {
         DeviceLogEntry.testDateParse("Mar 20 2017 13:39 CST"); // Mon Mar 20 21:39:00 SAST 2017
         DeviceLogEntry.testDateParse("Mar 10 2017 18:28 CST"); // before daylight savings, Sat Mar 11 02:28:00 SAST 2017
         DeviceLogEntry.testDateParse("Mar 14 2017 10:31 CST"); // after daylight savings, Tue Mar 14 18:31:00 SAST 2017
-        SubmitHistoryEntry.testDateParse("2017-03-29T08:14:01.461000Z");
+        SubmitHistoryEntry.testDateParse1("2017-03-29T08:14:01.461000Z");
         System.out.println(SubmitHistoryEntry.removeMillisecondDataFromDateString("2017-03-29T00:30:47.859179Z"));
+    }
+
+    private static void testDateParse(String dateString, String format) {
+        if ("1".equals(format)) {
+            SubmitHistoryEntry.testDateParse1(dateString);
+        } else {
+            SubmitHistoryEntry.testDateParse2(dateString);
+        }
     }
 
     private static void listFirstN(int N) {
