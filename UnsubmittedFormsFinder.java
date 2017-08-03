@@ -128,7 +128,7 @@ public class UnsubmittedFormsFinder {
         }
     }
 
-	private static List<DeviceLogEntry> parseDeviceLogsFromCsv(String csvFilename) {
+	public static List<DeviceLogEntry> parseDeviceLogsFromCsv(String csvFilename) {
 	    CsvReader<DeviceLogEntry> reader = new CsvReader<DeviceLogEntry>(csvFilename) {
 
             @Override
