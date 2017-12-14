@@ -13,6 +13,7 @@ public class DeviceLogEntry {
 	protected String username;
 	protected String deviceID;
 	protected String logMessage;
+	protected String logType;
 	// is this log entry for a "Form Entry Completed" event?
 	private boolean isEntryForFormCompletion;
 	// will only exist on newer log entries
@@ -32,9 +33,13 @@ public class DeviceLogEntry {
 		} catch (ParseException e) {
             System.out.println("Error parsing dates in DeviceLogEntry");
 		}
-		this.username = tokens[3];
-		this.deviceID = tokens[5];
-		this.logMessage = tokens[6];
+		logType = tokens[2];
+		username = tokens[3];
+		if (username.equals("Unknown")) {
+		    username = tokens[4];
+        }
+		deviceID = tokens[5];
+		logMessage = tokens[6];
 
 		isEntryForFormCompletion = logMessage.contains("Form Entry Completed");
 		if (isEntryForFormCompletion && logMessage.contains("for record with id ")) {
@@ -113,6 +118,7 @@ public class DeviceLogEntry {
 	    System.out.println("------");
 	    System.out.println("Log Date: " + logDate);
         System.out.println("Username: " + username);
+        System.out.println("Log Type: " + logType);
         System.out.println("Message: " + logMessage);
         System.out.println("Is form entry completed msg?: " + isEntryForFormCompletion);
         if (formRecordId != null) {
